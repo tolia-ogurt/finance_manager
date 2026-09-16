@@ -18,4 +18,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "FinanceManager"
 include(":app")
- 
+include(":core:ui")
