@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A clean, modern wallet and coin illustration optimized for 108x108 viewport (safe zone is center 72x72) -->
+    <path
+        android:fillColor="@color/icon_foreground"
+        android:pathData="M32,36 h44 c2.2,0 4,1.8 4,4 v28 c0,2.2 -1.8,4 -4,4 H32 c-2.2,0 -4,-1.8 -4,-4 V40 c0,-2.2 1.8,-4 4,-4 z" />
+    <path
+        android:fillColor="#A5D6A7"
+        android:pathData="M64,48 h16 v12 h-16 z" />
+    <path
+        android:fillColor="@color/icon_background"
+        android:pathData="M70,51 a3,3 0 1,0 0,6 a3,3 0 1,0 0,-6" />
+    <path
+        android:fillColor="#FFF59D"
+        android:pathData="M54,24 a6,6 0 1,0 0,12 a6,6 0 1,0 0,-12" />
+</vector>
