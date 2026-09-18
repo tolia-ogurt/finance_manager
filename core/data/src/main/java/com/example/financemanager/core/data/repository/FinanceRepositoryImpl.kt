@@ -13,6 +13,9 @@ class FinanceRepositoryImpl @Inject constructor(
 ) : FinanceRepository {
     override fun getAllTransactions(): Flow<List<TransactionEntity>> = transactionDao.getAllTransactions()
     
+    override fun getTransactionsInRange(startTime: Long, endTime: Long): Flow<List<TransactionEntity>> =
+        transactionDao.getTransactionsInRange(startTime, endTime)
+    
     override suspend fun addTransaction(transaction: TransactionEntity) {
         transactionDao.insertTransaction(transaction)
     }

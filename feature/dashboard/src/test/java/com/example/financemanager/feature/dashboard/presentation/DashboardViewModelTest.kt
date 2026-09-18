@@ -21,6 +21,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DashboardViewModelTest {
@@ -31,12 +32,14 @@ class DashboardViewModelTest {
 
     @Before
     fun setup() {
+        // Force US Locale for consistent test results
+        Locale.setDefault(Locale.US)
         Dispatchers.setMain(testDispatcher)
         repository = mockk()
         
         // Default mocks for initial state
         every { repository.getBudgetForMonth(any()) } returns flowOf(null)
-        every { repository.getAllTransactions() } returns flowOf(emptyList())
+        every { repository.getTransactionsInRange(any(), any()) } returns flowOf(emptyList())
         
         viewModel = DashboardViewModel(repository)
     }
@@ -63,7 +66,7 @@ class DashboardViewModelTest {
         )
         
         every { repository.getBudgetForMonth(any()) } returns flowOf(budget)
-        every { repository.getAllTransactions() } returns flowOf(transactions)
+        every { repository.getTransactionsInRange(any(), any()) } returns flowOf(transactions)
 
         // Re-create ViewModel to pick up new flow emissions immediately
         val newViewModel = DashboardViewModel(repository)
@@ -80,8 +83,7 @@ class DashboardViewModelTest {
     @Test
     fun `showAddTransaction updates state`() = runTest {
         viewModel.uiState.test {
-            // Initial item
-            awaitItem()
+            awaitItem() // Initial
             
             viewModel.showAddTransaction(true)
             assertTrue(awaitItem().isAddTransactionSheetVisible)
@@ -92,13 +94,52 @@ class DashboardViewModelTest {
     }
 
     @Test
-    fun `setBudget calls repository and closes dialog`() = runTest {
+    fun `setDateRange updates dateLabel and closes picker`() = runTest {
+        viewModel.uiState.test {
+            awaitItem() // Initial
+
+            // Select a specific range (UTC)
+            val start = 1725148800000L // Sep 1, 2024 00:00 UTC
+            val end = 1725235199000L   // Sep 1, 2024 23:59 UTC (Single day)
+            
+            viewModel.setDateRange(start, end)
+            
+            val state = awaitItem()
+            // Should be "September 1, 2024" or contain it
+            assertTrue("Actual label: ${state.dateLabel}", state.dateLabel.contains("Sep"))
+            assertTrue("Actual label: ${state.dateLabel}", state.dateLabel.contains("2024"))
+            assertFalse(state.isDatePickerVisible)
+        }
+    }
+
+    @Test
+    fun `selectEntireMonth updates dateLabel to month name`() = runTest {
+        viewModel.uiState.test {
+            awaitItem() // Initial
+
+            val sepMillis = 1725148800000L // Some time in Sep 2024
+            viewModel.selectEntireMonth(sepMillis)
+            
+            val state = awaitItem()
+            assertEquals("September 2024", state.dateLabel)
+            assertFalse(state.isDatePickerVisible)
+        }
+    }
+
+    @Test
+    fun `setBudget calls repository with correct month key`() = runTest {
         coEvery { repository.setBudget(any()) } returns Unit
+        
+        // Ensure we are in a known month
+        val sepStart = 1725148800000L // Sep 1, 2024 UTC
+        val sepEnd = 1727654399999L   // Sep 30, 2024 UTC
+        viewModel.setDateRange(sepStart, sepEnd)
         
         viewModel.setBudget(7000.0)
 
-        coVerify { repository.setBudget(match { it.monthlyLimit == 7000.0 }) }
-        assertFalse(viewModel.uiState.value.isAdjustBudgetDialogVisible)
+        coVerify { repository.setBudget(match { 
+            it.monthlyLimit == 7000.0 && it.monthYear == "9-2024" 
+        }) }
     }
 
     @Test

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface FinanceRepository {
     fun getAllTransactions(): Flow<List<TransactionEntity>>
+    fun getTransactionsInRange(startTime: Long, endTime: Long): Flow<List<TransactionEntity>>
     suspend fun addTransaction(transaction: TransactionEntity)
     fun getBudgetForMonth(monthYear: String): Flow<BudgetEntity?>
     suspend fun setBudget(budget: BudgetEntity)

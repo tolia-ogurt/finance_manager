@@ -41,6 +41,18 @@ class FinanceRepositoryImplTest {
     }
 
     @Test
+    fun `getTransactionsInRange returns filtered transactions from DAO`() = runTest {
+        val transactions = listOf(
+            TransactionEntity(id = 1, amount = 100.0, category = "Food", timestamp = 150L, note = "Lunch")
+        )
+        every { transactionDao.getTransactionsInRange(100L, 200L) } returns flowOf(transactions)
+
+        val result = repository.getTransactionsInRange(100L, 200L).first()
+
+        assertEquals(transactions, result)
+    }
+
+    @Test
     fun `addTransaction calls DAO insert`() = runTest {
         val transaction = TransactionEntity(amount = 50.0, category = "Transport", timestamp = 456L, note = "Bus")
         coEvery { transactionDao.insertTransaction(any()) } returns Unit
